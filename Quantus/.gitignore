@@ -1,0 +1,35 @@
+# jupyter notebook checkpoints
+.ipynb_checkpoints
+
+# pytest
+.pytest_cache
+*.DS_Store
+__pycache__/
+
+# data files
+*.jpg
+*.jpeg
+*.png
+*.npy
+*.npz
+*.csv
+*.pth
+tutorials/progress/
+tutorials/assets/data/
+tutorials/assets/model_objs/
+tests/test_scenarios.md
+
+# dev
+temp/
+
+# code coverage
+*.gcno
+*.gcda
+*.gcov
+test
+.coverage
+
+# build
+dist/
+*/*.egg-info/
+*.egg-info/

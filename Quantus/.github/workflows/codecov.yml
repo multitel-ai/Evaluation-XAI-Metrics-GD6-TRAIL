@@ -1,0 +1,21 @@
+name: codecov
+on: [push, pull_request]
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch
+        uses: actions/checkout@master
+      - name: Test
+        run: |
+          pip install -r requirements.txt 
+          #pip install coverage==6.2 pytest==6.2.5 pytest-cov==3.0.0 pytest-lazy-fixture==0.6.3
+          pytest tests -v --cov-report term --cov-report html:htmlcov --cov-report xml --cov=quantus
+          #coverage run -m pytest
+      - name: Upload
+        uses: codecov/codecov-action@v1
+        with:
+          #files: ./lib.c.gcov
+          token: ${{ secrets.CODECOV_TOKEN }}
+          
+          

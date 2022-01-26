@@ -18,6 +18,11 @@ datasets_dict = {
     },
 }
 
-def get_dataset(name, root):
+
+def get_dataset(name, root, conventional = True):
     cur_dict = datasets_dict[name]
-    return cur_dict["class_fn"](path.join(root, name), split=cur_dict['split'], transform=cur_dict["transform"]), cur_dict["n_output"]
+    if not conventional:
+      return cur_dict["class_fn"](path.join(root, name), split=cur_dict['split'], transform=cur_dict["transform"]), cur_dict["n_output"]
+    else:
+      return cur_dict["class_fn"](root, split=cur_dict['split'], transform=cur_dict["transform"]), cur_dict["n_output"]
+      #return torchvision.datasets.ImageFolder(root =path.join(root, cur_dict["split"]), transform=cur_dict["transform"]), cur_dict["n_output"]

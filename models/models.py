@@ -16,10 +16,12 @@ def get_model(name, n_output, checkpoint=None, pretrained=True):
     if checkpoint:
         model = cur_dict['class_fn'](pretrained=False)
     else:
+        print("Loading the pretrained model...")
         model = cur_dict['class_fn'](pretrained=pretrained)
 
     # change classifier to the correct size
-    if model.fc.in_features != n_output:
+    if model.fc.out_features != n_output:
+        print("Creating a new FC layer...")
         model.fc = torch.nn.Linear(model.fc.in_features, n_output)
 
     # load checkpoint
