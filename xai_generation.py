@@ -7,9 +7,7 @@ import torch.nn.functional as F
 from matplotlib import image as mpimg
 from matplotlib import pyplot as plt
 
-
 import sys
-
 
 import argparse
 from tqdm import tqdm
@@ -59,8 +57,8 @@ parser.set_defaults(gpu=True)
 parser.add_argument("--seed", type=int, default=123456,
                     help="Random seed")
 
-parser.add_argument("--val_size", type=int, default=200,
-                    help="Validation size")
+parser.add_argument("--limit_val", type=int, default=0,
+                    help="Limit validation size. Default to 0 => no limitation")
 
 parser.add_argument("--batch_size", type=int, default=16,
                     help="Batch size")
@@ -99,10 +97,12 @@ def main():
     #acc_check = accuracy_checking(model, dataset)
     #print("[Check] Accuracy: ", acc_check)
 
-    #Random sample
-    subset_indices  = np.random.randint(0,high=len(dataset),size= args.val_size)
-    subset = torch.utils.data.Subset(dataset, subset_indices)
-
+    # Limit val size
+    if args.limit_val != 0:
+        subset_indices  = np.random.randint(0, high=(len(dataset)-1), size=min(args.limit_val, len(dataset)))
+        subset = torch.utils.data.Subset(dataset, subset_indices)
+    else:
+        subset = dataset
 
     val_loader = torch.utils.data.DataLoader(subset, batch_size=batch_size, shuffle = False)
 
