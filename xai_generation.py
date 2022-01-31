@@ -14,7 +14,7 @@ from os import path
 import argparse
 from tqdm import tqdm
 
-from datasets import get_dataset
+from datasets import get_dataset, XAIDataset
 from models import get_model
 from methods import get_method
 from metrics import get_results
@@ -52,6 +52,19 @@ parser.add_argument("--method", type=str, default='smoothgrad',
 #########################
 parser.add_argument("--csv_folder", type=str, default='csv',
                     help = "csv folder to save metrics")
+parser.add_argument("--npz_folder", type=str, default='npz',
+                    help = "npz folder to save or load xai maps id required")
+
+parser.add_argument("--save_npz", dest='save_npz', action='store_true',
+                    help = "save xai maps in a npz file")
+parser.set_defaults(save_npz=False)
+
+parser.add_argument("--npz_checkpoint", type=str, default='',
+                    help = "use this option to load a checkpoint npz for metric computation, skip map computation if used")
+
+parser.add_argument("--skip_metrics", dest='skip_metrics', action='store_true',
+                    help = "skip metrics computation, useful to just produce the maps without metrics")
+parser.set_defaults(skip_metrics=False)
 
 #########################
 ### other parameters ####
@@ -115,51 +128,72 @@ def main():
     val_loader = torch.utils.data.DataLoader(subset, batch_size=batch_size, shuffle = False)
 
     scores = []
+    saliencies_maps = []
 
-    for j, (X, y) in tqdm(enumerate(val_loader), total=len(val_loader), desc = "Processing validation subset"):
-        saliencies_maps = []
+    if args.npz_checkpoint:
+        print("loading saliencies maps from npz")
+        try:
+            saliencies_maps = torch.tensor(np.load(path.join(args.npz_folder, args.npz_checkpoint))['arr_0'])
+        except:
+            saliencies_maps = torch.tensor(np.load(args.npz_checkpoint)['arr_0'])
+    else:
+        for X, y in tqdm(val_loader, total=len(val_loader), desc = "Generating saliency maps"):
 
-        if args.gpu:
-            X = X.cuda()
-            y = y.cuda()
-        
-        # One image at a time since some methods process each image multiple times using internal batches
-        for i in range(X.shape[0]):
+            if args.gpu:
+                X = X.cuda()
+                y = y.cuda()
 
-            # First forward pass
-            with torch.no_grad():
-                out = model(X[i].unsqueeze(0))
+            # One image at a time since some methods process each image multiple times using internal batches
+            for i in range(X.shape[0]):
 
-            # generate saliency map depending on the choosen method (sum over channels for gradient methods)
-            saliency_map = method.attribute(X[i].unsqueeze(0), target=y[i]).sum(1)
+                # First forward pass
+                with torch.no_grad():
+                    out = model(X[i].unsqueeze(0))
 
-            saliencies_maps.append(saliency_map)
+                # generate saliency map depending on the choosen method (sum over channels for gradient methods)
+                saliency_map = method.attribute(X[i].unsqueeze(0), target=y[i]).sum(1)
+
+                saliencies_maps.append(saliency_map)
 
         saliencies_maps = torch.stack(saliencies_maps)
 
-        # device
-        if args.gpu:
-            device = "cuda"
-        else:
-            device = "cpu" 
+        if args.save_npz:
+            print("saving saliencies to npz")
+            npz_name = args.method + "_" + args.model + "_" + args.dataset_name
+            np.savez(path.join(args.npz_folder, npz_name), saliencies_maps.cpu().numpy())
 
-        """Compute metrics per batch
-        x_batch: batch of images, y_batch: batch of labels, s_batch: batch of saliencies_maps
-        s_batch: batch of masks for localisation metrics
-        
-        """
-        scores_saliency = get_results(model, name = args.metrics,
-            x_batch = X.cpu().detach().numpy(), y_batch = y.cpu().detach().numpy(),
-             a_batch =saliencies_maps.cpu().detach().numpy(), s_batch = None, device = device)
+    xai_dataset = XAIDataset(subset, saliencies_maps)
+    xai_loader = torch.utils.data.DataLoader(xai_dataset, batch_size=batch_size, shuffle = False)
 
-        scores.append(scores_saliency)
+    if not args.skip_metrics:
+        for (X, y), A in tqdm(xai_loader, desc="Computing metrics"):
+            # device
+            if args.gpu:
+                device = "cuda"
+            else:
+                device = "cpu"
 
-    scores = np.stack(scores)
+            """Compute metrics per batch
+            x_batch: batch of images, y_batch: batch of labels, s_batch: batch of saliencies_maps
+            s_batch: batch of masks for localisation metrics
+            
+            """
+            scores_saliency = get_results(model,
+                                          name = args.metrics,
+                                          x_batch = X.cpu().detach().numpy(),
+                                          y_batch = y.cpu().detach().numpy(),
+                                          a_batch =A.cpu().detach().numpy(),
+                                          s_batch = None,
+                                          device = device)
 
-    # save metrics in csv files
-    scores_df = pd.DataFrame(data=scores, index=None, columns=None)
-    csv_name = args.method + "_" + args.model + "_" + args.dataset_name + "_" + args.metrics + ".csv"
-    scores_df.to_csv(path.join(args.csv_folder, csv_name), header=False, index=False)
+            scores.append(scores_saliency)
+
+        scores = np.stack(scores)
+
+        # save metrics in csv files
+        scores_df = pd.DataFrame(data=scores, index=None, columns=None)
+        csv_name = args.method + "_" + args.model + "_" + args.dataset_name + "_" + args.metrics + ".csv"
+        scores_df.to_csv(path.join(args.csv_folder, csv_name), header=False, index=False)
 
 
 def accuracy_checking(model, dataset, nr_samples = 100):

@@ -3,6 +3,7 @@ from os import path
 import pandas as pd
 
 import torch
+from torch.utils.data import Dataset
 
 from torchvision import transforms
 
@@ -35,3 +36,15 @@ def get_dataset(name, root):
         subset = dataset
 
     return subset, cur_dict["n_output"]
+
+
+class XAIDataset(Dataset):
+    def __init__(self, dataset, xai):
+        self.dataset = dataset
+        self.xai = xai
+
+    def __len__(self):
+        return len(self.dataset)
+
+    def __getitem__(self, idx):
+        return self.dataset[idx], self.xai[idx].unsqueeze(0)
