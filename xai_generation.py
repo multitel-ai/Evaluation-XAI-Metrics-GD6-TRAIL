@@ -1,5 +1,6 @@
 import random
 import numpy as np
+import pandas as pd
 import torch
 from torchvision import transforms
 import torch.nn.functional as F
@@ -8,6 +9,7 @@ from matplotlib import image as mpimg
 from matplotlib import pyplot as plt
 
 import sys
+from os import path
 
 import argparse
 from tqdm import tqdm
@@ -44,6 +46,12 @@ parser.add_argument("--model", type=str, default='resnet50',
 #########################
 parser.add_argument("--method", type=str, default='smoothgrad',
                     help = "xai method")
+
+#########################
+### saving parameters ###
+#########################
+parser.add_argument("--csv_folder", type=str, default='csv',
+                    help = "csv folder to save metrics")
 
 #########################
 ### other parameters ####
@@ -146,7 +154,12 @@ def main():
 
         scores.append(scores_saliency)
 
-    print(scores)
+    scores = np.stack(scores)
+
+    # save metrics in csv files
+    scores_df = pd.DataFrame(data=scores, index=None, columns=None)
+    csv_name = args.method + "_" + args.model + "_" + args.dataset_name + "_" + args.metrics + ".csv"
+    scores_df.to_csv(path.join(args.csv_folder, csv_name), header=False, index=False)
 
 
 def accuracy_checking(model, dataset, nr_samples = 100):
