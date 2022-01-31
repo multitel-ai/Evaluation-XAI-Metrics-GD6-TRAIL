@@ -14,6 +14,13 @@ class SmoothGrad(NoiseTunnel):
     def attribute(self, inputs, target=None):
         return super().attribute(inputs, target=target, **methods_dict['smoothgrad']['params_attr'])
 
+class IntegratedGrad(IntegratedGradients):
+    def __init__(self, model):
+        super().__init__(model)
+
+    def attribute(self, inputs, target=None):
+        return  super().attribute(inputs, target=target, **methods_dict['integratedgrad']['params_attr'])
+
 class GradCAM(LayerGradCam):
     def __init__(self, model):
         super().__init__(model, model.layer4)
@@ -32,7 +39,10 @@ class Rise:
 
 methods_dict = {
     'integratedgrad': {
-        'class_fn': IntegratedGradients,
+        'class_fn': IntegratedGrad,
+        'params_attr': {
+            'n_steps': 50,
+        },
     },
     'smoothgrad': {
         'class_fn': SmoothGrad,
