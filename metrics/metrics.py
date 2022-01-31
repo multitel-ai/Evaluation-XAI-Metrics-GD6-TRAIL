@@ -6,7 +6,7 @@ import quantus
 
 
 from .hyper_parameters_metrics import hyper_param_eval
-
+from .meta_parameters_metrics import meta_param
 
 def get_results(model, name =  "Faithfulness Correlation", x_batch = None, y_batch = None, a_batch = None, s_batch = None, device = "cuda"):
 
@@ -51,6 +51,5 @@ def get_results(model, name =  "Faithfulness Correlation", x_batch = None, y_bat
   assert name in metric.keys(), f"Only metrics in {metric.keys()} are allowed!!!"
 
 
-
   return metric[name](**hyper_param_eval[name])(model = model, x_batch = x_batch, y_batch = y_batch,
-    a_batch = a_batch, **{"device" : device})
+    a_batch = a_batch, **meta_param(name, device))
