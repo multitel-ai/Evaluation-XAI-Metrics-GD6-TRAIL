@@ -66,7 +66,7 @@ parser.add_argument("--batch_size", type=int, default=16,
                     help="Batch size")
 
 
-parser.add_argument("--metrics", type=str, default="Faithfulness Estimate", help = "metrics used for benchmarking")
+parser.add_argument("--metrics", type=str, default="Faithfulness Correlation", help = "metrics used for benchmarking")
 
 
 def main():
