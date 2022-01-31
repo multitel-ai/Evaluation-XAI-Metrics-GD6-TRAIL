@@ -23,14 +23,10 @@ datasets_dict = {
 }
 
 
-def get_dataset(name, root, conventional = True):
+def get_dataset(name, root):
     cur_dict = datasets_dict[name]
-    if not conventional:
-      dataset = cur_dict["class_fn"](path.join(root, name), split=cur_dict['split'], transform=cur_dict["transform"])
-    else:
-      dataset = cur_dict["class_fn"](root, split=cur_dict['split'], transform=cur_dict["transform"])
+    dataset = cur_dict["class_fn"](path.join(root, name), split=cur_dict['split'], transform=cur_dict["transform"])
 
-    print(len(dataset))
     try:
         print("Use preselected indexes")
         subset_indices = pd.read_csv(cur_dict['indices_csv'], header=None)[0].to_numpy()
