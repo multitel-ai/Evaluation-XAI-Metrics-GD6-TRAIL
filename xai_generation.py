@@ -98,7 +98,6 @@ def main():
     #Checking accuracy
     #acc_check = accuracy_checking(model, dataset)
     #print("[Check] Accuracy: ", acc_check)
-    # Loop over the dataset.
 
     #Random sample
     subset_indices  = np.random.randint(0,high=len(dataset),size= args.val_size)
@@ -125,28 +124,10 @@ def main():
 
             # generate saliency map depending on the choosen method (sum over channels for gradient methods)
             saliency_map = method.attribute(X[i].unsqueeze(0), target=y[i]).sum(1)
-            #img = saliency_map.cpu().numpy()[0]
-            #print("saliency")
-            #plt.imsave(f"saliency{i}_{j}.png", img)
 
             saliencies_maps.append(saliency_map)
 
         saliencies_maps = torch.stack(saliencies_maps)
-        print(saliencies_maps.shape)
-        # TODO, compute metric
-        # params_eval = {
-        #   "nr_samples": 10,
-        #   "perturb_radius": 0.1,
-        #   "norm_numerator": quantus.fro_norm,
-        #   "norm_denominator": quantus.fro_norm,
-        #   "perturb_func": quantus.uniform_sampling,
-        #   "similarity_func": quantus.difference,
-        #   "img_size": 224,
-        #   "nr_channels": 3,
-        #   "normalise": False, 
-        #   "abs": False,
-        #   "disable_warnings": True,
-        # }
 
         # device
         if args.gpu:
@@ -162,17 +143,11 @@ def main():
         scores_saliency = get_results(model, name = args.metrics,
             x_batch = X.cpu().detach().numpy(), y_batch = y.cpu().detach().numpy(),
              a_batch =saliencies_maps.cpu().detach().numpy(), s_batch = None, device = device)
-        # scores_saliency = quantus.MaxSensitivity(**params_eval)(model=model,
-        #                                                     x_batch=X.cpu().detach().numpy(),
-        #                                                     y_batch=y.cpu().detach().numpy(),
-        #                                                     a_batch=saliencies_maps.cpu().detach().numpy(),
-        #                                                     **{"explain_func": quantus.explain, 
-        #                                                        "method": "Saliency", 
-        #                                                        "device": device})
 
         scores.append(scores_saliency)
 
     print(scores)
+
 
 def accuracy_checking(model, dataset, nr_samples = 100):
     i = 0
@@ -187,22 +162,8 @@ def accuracy_checking(model, dataset, nr_samples = 100):
         if i > nr_samples:
             break
 
-
     return correct.cpu().detach().numpy()*100/(nr_samples)
-
-
-
-
 
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-
-
-
