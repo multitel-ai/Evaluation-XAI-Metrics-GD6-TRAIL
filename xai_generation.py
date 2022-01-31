@@ -69,11 +69,6 @@ parser.add_argument("--batch_size", type=int, default=16,
 parser.add_argument("--metrics", type=str, default="sensitivity", help = "metrics used for benchmarking")
 
 
-
-
-#parser.add_argument("--batch_size", type=int, default=1,
-#                    help="max batch size (when saliency method use it), default to 1")
-
 def main():
     # Get arguements
     global args
@@ -112,8 +107,9 @@ def main():
 
     val_loader = torch.utils.data.DataLoader(subset, batch_size=batch_size, shuffle = False)
 
+    scores = []
 
-    for j, (X, y) in tqdm(enumerate(val_loader), desc = "Iteration per batch"):
+    for j, (X, y) in tqdm(enumerate(val_loader), total=len(val_loader), desc = "Processing validation subset"):
         saliencies_maps = []
 
         if args.gpu:
@@ -121,7 +117,7 @@ def main():
             y = y.cuda()
         
         # One image at a time since some methods process each image multiple times using internal batches
-        for i in tqdm(range(X.shape[0]), desc='generating xai maps'):
+        for i in range(X.shape[0]):
 
             # First forward pass
             with torch.no_grad():
@@ -163,7 +159,7 @@ def main():
         s_batch: batch of masks for localisation metrics
         
         """
-        scores_saliency = get_results(model, name = "Faithfulness Correlation", 
+        scores_saliency = get_results(model, name = "Faithfulness Correlation",
             x_batch = X.cpu().detach().numpy(), y_batch = y.cpu().detach().numpy(),
              a_batch =saliencies_maps.cpu().detach().numpy(), s_batch = None, device = device)
         # scores_saliency = quantus.MaxSensitivity(**params_eval)(model=model,
@@ -173,8 +169,10 @@ def main():
         #                                                     **{"explain_func": quantus.explain, 
         #                                                        "method": "Saliency", 
         #                                                        "device": device})
-        print(scores_saliency)
-            
+
+        scores.append(scores_saliency)
+
+    print(scores)
 
 def accuracy_checking(model, dataset, nr_samples = 100):
     i = 0
