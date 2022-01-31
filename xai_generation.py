@@ -66,7 +66,7 @@ parser.add_argument("--batch_size", type=int, default=16,
                     help="Batch size")
 
 
-parser.add_argument("--metrics", type=str, default="sensitivity", help = "metrics used for benchmarking")
+parser.add_argument("--metrics", type=str, default="Faithfulness Estimate", help = "metrics used for benchmarking")
 
 
 def main():
@@ -159,7 +159,7 @@ def main():
         s_batch: batch of masks for localisation metrics
         
         """
-        scores_saliency = get_results(model, name = "Faithfulness Correlation",
+        scores_saliency = get_results(model, name = args.metrics,
             x_batch = X.cpu().detach().numpy(), y_batch = y.cpu().detach().numpy(),
              a_batch =saliencies_maps.cpu().detach().numpy(), s_batch = None, device = device)
         # scores_saliency = quantus.MaxSensitivity(**params_eval)(model=model,
