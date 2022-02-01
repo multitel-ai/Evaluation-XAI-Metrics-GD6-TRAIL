@@ -145,11 +145,6 @@ def main():
 
             # One image at a time since some methods process each image multiple times using internal batches
             for i in range(X.shape[0]):
-
-                # First forward pass
-                with torch.no_grad():
-                    out = model(X[i].unsqueeze(0))
-
                 # generate saliency map depending on the choosen method (sum over channels for gradient methods)
                 saliency_map = method.attribute(X[i].unsqueeze(0), target=y[i]).sum(1)
 
