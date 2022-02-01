@@ -2,11 +2,11 @@ import captum
 import torch
 from captum.attr import NoiseTunnel
 from captum.attr import IntegratedGradients
-from captum.attr import LayerGradCam
 from captum.attr import GuidedBackprop
 
 from RISE.explanations import RISE
 
+from torchcam.methods import GradCAM
 
 ### Wrapper functions ###
 
@@ -57,6 +57,26 @@ class Rise:
             return self.rise(inputs)[target].view((1, 1, self.input_size, self.input_size))
 
 
+# Torchcam
+
+class CAMWrapper:
+    def __init__(self,
+                 model,
+                 method_name='gradcam',
+                 batch_size=16,
+                 **kwargs):
+        self.model = model
+        self.xai_method = methods_dict[method_name]['base_class'](model)
+
+    def attribute(self, inputs, target=None):
+        torch.set_grad_enabled(True)
+        input_grad = inputs.clone().detach().requires_grad_(True)
+        out = self.model(input_grad)
+        map = self.xai_method(target.item(), out)
+        map = map[0].view(1, 1, *map[0].shape)
+        return map
+
+
 ### Parameters for each method ###
 methods_dict = {
     'integratedgrad': {
@@ -86,6 +106,10 @@ methods_dict = {
             'n_masks': 4000,
         }
     },
+    'gradcam': {
+        'class_fn': CAMWrapper,
+        'base_class': GradCAM,
+    }
 }
 
 
