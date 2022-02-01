@@ -7,6 +7,11 @@ from captum.attr import GuidedBackprop
 
 from RISE.explanations import RISE
 
+
+### Wrapper functions ###
+
+# Captum
+
 class SmoothGrad(NoiseTunnel):
     def __init__(self, model):
         self.saliency = captum.attr.Saliency(model)
@@ -26,6 +31,9 @@ class GradCAM(LayerGradCam):
     def __init__(self, model):
         super().__init__(model, model.layer4)
 
+
+# Rise
+
 class Rise:
     def __init__(self, model, input_size=224, batch_size=16):
         params = methods_dict['rise']['params_attr']
@@ -38,6 +46,7 @@ class Rise:
             return self.rise(inputs)[target].view((1, 1, self.input_size, self.input_size))
 
 
+### Parameters for each method ###
 methods_dict = {
     'integratedgrad': {
         'class_fn': IntegratedGrad,
