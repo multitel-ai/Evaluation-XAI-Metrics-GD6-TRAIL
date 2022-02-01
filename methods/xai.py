@@ -8,6 +8,7 @@ from RISE.explanations import RISE
 
 from torchcam.methods import GradCAM
 from torchcam.methods import ScoreCAM
+from torchcam.methods import LayerCAM
 
 ### Wrapper functions ###
 
@@ -66,9 +67,13 @@ class CAMWrapper:
                  method_name='gradcam',
                  batch_size=16,
                  **kwargs):
+        self.method_name = method_name
         self.model = model
         if methods_dict[method_name]['use_batch_size']:
             self.xai_method = methods_dict[method_name]['base_class'](model, batch_size=batch_size)
+        elif method_name == 'layercam':
+            self.xai_method = methods_dict[method_name]['base_class'](model,
+                                                                      target_layer=methods_dict[method_name]['layers'])
         else:
             self.xai_method = methods_dict[method_name]['base_class'](model)
 
@@ -77,7 +82,11 @@ class CAMWrapper:
         input_grad = inputs.clone().detach().requires_grad_(True)
         out = self.model(input_grad)
         map = self.xai_method(target.item(), out)
-        map = map[0].view(1, 1, *map[0].shape)
+        if self.method_name == 'layercam':
+            map = self.xai_method.fuse_cams(map)
+            map = map.view(1, 1, *map.shape)
+        else:
+            map = map[0].view(1, 1, *map[0].shape)
         return map
 
 
@@ -119,6 +128,12 @@ methods_dict = {
         'class_fn':CAMWrapper,
         'base_class': ScoreCAM,
         'use_batch_size': True,
+    },
+    'layercam': {
+        'class_fn':CAMWrapper,
+        'base_class': LayerCAM,
+        'use_batch_size': False,
+        'layers': ['relu', 'layer1', 'layer2', 'layer3', 'layer4']
     }
 }
 
