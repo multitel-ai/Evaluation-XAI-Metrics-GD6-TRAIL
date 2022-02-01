@@ -90,6 +90,19 @@ class CAMWrapper:
         return map
 
 
+### Dummy xai methods for sanity check ###
+
+class Random:
+    """
+    Output a random map with the same size as the input but 1 channel
+    """
+    def __init__(self, model, **kwargs):
+        pass
+
+    def attribute(self, inputs, target=None):
+        return torch.rand(1, 1, *inputs.shape[-2:])
+
+
 ### Parameters for each method ###
 methods_dict = {
     'integratedgrad': {
@@ -134,6 +147,9 @@ methods_dict = {
         'base_class': LayerCAM,
         'use_batch_size': False,
         'layers': ['relu', 'layer1', 'layer2', 'layer3', 'layer4']
+    },
+    'random': {
+        'class_fn': Random,
     }
 }
 
