@@ -13,29 +13,27 @@ from RISE.explanations import RISE
 # Captum
 
 class SmoothGrad(NoiseTunnel):
-    def __init__(self, model):
+    def __init__(self, model, method_name='smoothgrad'):
         self.saliency = captum.attr.Saliency(model)
         super().__init__(self.saliency)
 
     def attribute(self, inputs, target=None):
         return super().attribute(inputs, target=target, **methods_dict['smoothgrad']['params_attr'])
 
-class IntegratedGrad(IntegratedGradients):
-    def __init__(self, model):
-        super().__init__(model)
+class GradWrapper:
+    def __init__(self, model, method_name='integratedgrad'):
+        self.method_name = method_name
+        self.xai_method = methods_dict[method_name]['base_class'](model)
+        print(self.xai_method)
 
     def attribute(self, inputs, target=None):
-        return  super().attribute(inputs, target=target, **methods_dict['integratedgrad']['params_attr'])
-
-class GradCAM(LayerGradCam):
-    def __init__(self, model):
-        super().__init__(model, model.layer4)
+        return  self.xai_method.attribute(inputs, target=target, **methods_dict[self.method_name]['params_attr'])
 
 
 # Rise
 
 class Rise:
-    def __init__(self, model, input_size=224, batch_size=16):
+    def __init__(self, model, input_size=224, batch_size=16, method_name='rise'):
         params = methods_dict['rise']['params_attr']
         self.rise = RISE(model, (input_size, input_size), batch_size)
         self.rise.generate_masks(N=params['n_masks'], s=8, p1=0.1)
@@ -49,7 +47,8 @@ class Rise:
 ### Parameters for each method ###
 methods_dict = {
     'integratedgrad': {
-        'class_fn': IntegratedGrad,
+        'class_fn': GradWrapper,
+        'base_class': IntegratedGradients,
         'params_attr': {
             'n_steps': 50,
         },
@@ -61,10 +60,10 @@ methods_dict = {
         },
     },
     'guidedbackprop': {
-        'class_fn': GuidedBackprop,
-    },
-    'gradcam': {
-        'class_fn': GradCAM,
+        'class_fn': GradWrapper,
+        'base_class': GuidedBackprop,
+        'params_attr': {
+        },
     },
     'rise': {
         'class_fn': Rise,
@@ -77,4 +76,4 @@ methods_dict = {
 
 def get_method(name, model):
     cur_dict = methods_dict[name]
-    return cur_dict["class_fn"](model)
+    return cur_dict["class_fn"](model, method_name=name)
