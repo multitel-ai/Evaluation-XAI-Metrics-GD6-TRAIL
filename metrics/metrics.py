@@ -1,4 +1,5 @@
 import sys
+import torch
 
 sys.path.append("Quantus")
 
@@ -49,7 +50,15 @@ def get_results(model, name =  "Faithfulness Correlation", x_batch = None, y_bat
   }
 
   assert name in metric.keys(), f"Only metrics in {metric.keys()} are allowed!!!"
-
+  
+  #Upsample images if saliency's shape != image's shape
+  if x_batch.shape[2] != a_batch.shape[2]:
+    if torch.cuda.is_available():
+      with torch.cuda.device(device if device =="cuda" else None):
+        a_batch = torch.nn.Upsample(scale_factor=x_batch.shape[2]/a_batch.shape[2], mode='nearest')(torch.from_numpy(a_batch)).cpu().detach().numpy()
+    else:
+      a_batch = torch.nn.Upsample(scale_factor=x_batch.shape[2]/a_batch.shape[2], mode='bilinear')(torch.from_numpy(a_batch)).cpu().detach().numpy()
+      
 
   return metric[name](**hyper_param_eval[name])(model = model, x_batch = x_batch, y_batch = y_batch,
     a_batch = a_batch, **meta_param(name, device))
