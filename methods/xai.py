@@ -3,6 +3,7 @@ import torch
 from captum.attr import NoiseTunnel
 from captum.attr import IntegratedGradients
 from captum.attr import LayerGradCam
+from captum.attr import GuidedBackprop
 
 from RISE.explanations import RISE
 
@@ -49,6 +50,9 @@ methods_dict = {
         'params_attr': {
             'nt_samples': 50,
         },
+    },
+    'guidedbackprop': {
+        'class_fn': GuidedBackprop,
     },
     'gradcam': {
         'class_fn': GradCAM,
