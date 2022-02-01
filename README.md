@@ -24,4 +24,4 @@ To compute the metrics using a previously generated npz checkpoint you can use
 
 ### Compute metrics from scratch
 The command is the same as the above, except that you don't specify a checkpoint, then the maps will be generated before computing the metrics
-`python xai_generation.py --npz_checkpoint NPZ_NAME.npz --method METHOD_NAME --metrics METRIC_NAME`
+`python xai_generation.py --method METHOD_NAME --metrics METRIC_NAME`
