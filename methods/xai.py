@@ -7,6 +7,7 @@ from captum.attr import GuidedBackprop
 from RISE.explanations import RISE
 
 from torchcam.methods import GradCAM
+from torchcam.methods import ScoreCAM
 
 ### Wrapper functions ###
 
@@ -66,7 +67,10 @@ class CAMWrapper:
                  batch_size=16,
                  **kwargs):
         self.model = model
-        self.xai_method = methods_dict[method_name]['base_class'](model)
+        if methods_dict[method_name]['use_batch_size']:
+            self.xai_method = methods_dict[method_name]['base_class'](model, batch_size=batch_size)
+        else:
+            self.xai_method = methods_dict[method_name]['base_class'](model)
 
     def attribute(self, inputs, target=None):
         torch.set_grad_enabled(True)
@@ -109,6 +113,12 @@ methods_dict = {
     'gradcam': {
         'class_fn': CAMWrapper,
         'base_class': GradCAM,
+        'use_batch_size': False,
+    },
+    'scorecam': {
+        'class_fn':CAMWrapper,
+        'base_class': ScoreCAM,
+        'use_batch_size': True,
     }
 }
 
