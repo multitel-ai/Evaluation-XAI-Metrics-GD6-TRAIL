@@ -112,7 +112,7 @@ def main():
 
     
     # Get method
-    method= get_method(args.method, model)
+    method= get_method(args.method, model, batch_size=args.batch_size)
 
     #Checking accuracy
     #acc_check = accuracy_checking(model, dataset)
