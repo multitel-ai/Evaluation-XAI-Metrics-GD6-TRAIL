@@ -395,7 +395,10 @@ class FaithfulnessEstimate(Metric):
                         "perturb_baseline": self.perturb_baseline,
                     },
                 )
-                assert_perturbation_caused_change(x=x, x_perturbed=x_perturbed)
+                   
+#                  assert_perturbation_caused_change(x=x, x_perturbed=x_perturbed)
+
+                  
 
                 # Predict on perturbed input x.
                 with torch.no_grad():
@@ -1474,11 +1477,13 @@ class Selectivity(Metric):
             patches = []
             sub_results = []
             x_perturbed = x.copy()
+            
+            #gnanfack_edit chaning int(a.shape[0] / self.patch_size) to int(a.shape[1] / self.patch_size),
 
             att_sums = np.zeros(
                 (
-                    int(a.shape[0] / self.patch_size),
                     int(a.shape[1] / self.patch_size),
+                    int(a.shape[2] / self.patch_size),
                 )
             )
 
@@ -1487,7 +1492,7 @@ class Selectivity(Metric):
                 for i_y, top_left_y in enumerate(range(0, x.shape[2], self.patch_size)):
 
                     # Sum attributions for patch.
-                    att_sums[i_x][i_y] = a[
+                    att_sums[i_x][i_y] = a[:,
                         top_left_x : top_left_x + self.patch_size,
                         top_left_y : top_left_y + self.patch_size,
                     ].sum()
