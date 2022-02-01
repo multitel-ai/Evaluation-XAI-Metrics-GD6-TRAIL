@@ -11,11 +11,12 @@ hyper_param_eval = {
             "perturb_baseline": "black",
             "perturb_func": quantus.baseline_replacement_by_indices,
             "similarity_func": quantus.correlation_pearson,  
-            "abs": False
+            "abs": False,
+            "return_aggregate": False,
         },
         'Faithfulness Estimate': {
-            "perturb_func": quantus.baseline_replacement_by_indices,
             "similarity_func": quantus.correlation_pearson,
+             "perturb_func": quantus.baseline_replacement_by_indices,
             "img_size": 224,  
             "features_in_step": 224,  
             "perturb_baseline": "black",  
