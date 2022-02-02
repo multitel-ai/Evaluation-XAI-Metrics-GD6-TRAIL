@@ -47,4 +47,4 @@ class XAIDataset(Dataset):
         return len(self.dataset)
 
     def __getitem__(self, idx):
-        return self.dataset[idx], self.xai[idx].unsqueeze(0)
+        return self.dataset[idx], self.xai[idx]
