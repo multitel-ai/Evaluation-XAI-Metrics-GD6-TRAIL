@@ -190,7 +190,10 @@ def main():
 
         # save metrics in csv files
         scores_df = pd.DataFrame(data=scores, index=None, columns=None)
-        csv_name = args.method + "_" + args.model + "_" + args.dataset_name + "_" + args.metrics + ".csv"
+        if args.npz_checkpoint:
+            csv_name = args.npz_checkpoint.split('/')[-1].split('.')[0] + "_" + args.metrics + ".csv"
+        else:
+            csv_name = args.method + "_" + args.model + "_" + args.dataset_name + "_" + args.metrics + ".csv"
         scores_df.to_csv(path.join(args.csv_folder, csv_name), header=False, index=False)
 
 
