@@ -111,8 +111,11 @@ def main():
         model = model.cuda()
 
     
-    # Get method
-    method= get_method(args.method, model, batch_size=args.batch_size)
+    # Get method if no checkpoint provided
+    if args.npz_checkpoint:
+        method = None
+    else:
+        method= get_method(args.method, model, batch_size=args.batch_size)
 
     #Checking accuracy
     #acc_check = accuracy_checking(model, dataset)
