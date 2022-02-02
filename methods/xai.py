@@ -10,6 +10,9 @@ from torchcam.methods import GradCAM
 from torchcam.methods import ScoreCAM
 from torchcam.methods import LayerCAM
 
+
+from torchvision.transforms import functional as Ft
+
 ### Wrapper functions ###
 
 # Captum
@@ -102,6 +105,31 @@ class Random:
     def attribute(self, inputs, target=None):
         return torch.rand(1, 1, *inputs.shape[-2:])
 
+class Sobel:
+    """
+    Border detection using a Sobel filter
+    """
+    def __init__(self, model, **kwargs):
+        pass
+
+    def attribute(self, inputs, target=None):
+        grayscale = Ft.rgb_to_grayscale(inputs)
+        sobel_filter = torch.tensor(
+            [[[[1, 0, -1],
+               [2, 0, -2],
+               [1, 0, -1]], ],
+             [[[1, 2, 1],
+               [0, 0, 0],
+               [-1, -2, -1]]], ],
+            device=inputs.device,
+            dtype=inputs.dtype
+        )
+        x = torch.nn.functional.conv2d(grayscale, sobel_filter)
+        x = x.square()
+        x = x.sum(1, keepdim=True)
+        x = x.sqrt()
+        return x
+
 
 ### Parameters for each method ###
 methods_dict = {
@@ -150,6 +178,9 @@ methods_dict = {
     },
     'random': {
         'class_fn': Random,
+    },
+    'sobel': {
+        'class_fn': Sobel,
     }
 }
 
