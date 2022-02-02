@@ -175,9 +175,9 @@ def main():
             """
             scores_saliency = get_results(model,
                                           name = args.metrics,
-                                          x_batch = X.cpu().detach().numpy(),
-                                          y_batch = y.cpu().detach().numpy(),
-                                          a_batch =A.cpu().detach().numpy(),
+                                          x_batch = X,
+                                          y_batch = y,
+                                          a_batch =A,
                                           s_batch = None,
                                           device = device)
 
