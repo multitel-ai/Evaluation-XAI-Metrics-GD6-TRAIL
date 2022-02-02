@@ -182,7 +182,9 @@ class FaithfulnessCorrelation(Metric):
                         "perturb_baseline": self.perturb_baseline,
                     },
                 )
-                assert_perturbation_caused_change(x=x, x_perturbed=x_perturbed)
+                
+                #Assert gnanfack_edit, removing this assert
+                #assert_perturbation_caused_change(x=x, x_perturbed=x_perturbed)
 
                 # Predict on perturbed input x.
                 with torch.no_grad():
@@ -1238,11 +1240,13 @@ class RegionPerturbation(Metric):
             patches = []
             sub_results = []
             x_perturbed = x.copy()
+            
+            #gnanfack_edit changing int(a.shape[0] / self.patch_size) to int(a.shape[1] / self.patch_size)
 
             att_sums = np.zeros(
                 (
-                    int(a.shape[0] / self.patch_size),
                     int(a.shape[1] / self.patch_size),
+                    int(a.shape[2] / self.patch_size),
                 )
             )
 
@@ -1250,7 +1254,15 @@ class RegionPerturbation(Metric):
             for i_x, top_left_x in enumerate(range(0, x.shape[1], self.patch_size)):
                 for i_y, top_left_y in enumerate(range(0, x.shape[2], self.patch_size)):
                     # Sum attributions for patch.
-                    att_sums[i_x][i_y] = a[
+                    """ gnanfack_edit changing a[
+                        top_left_x : top_left_x + self.patch_size,
+                        top_left_y : top_left_y + self.patch_size,
+                    ].sum() to a[:,
+                        top_left_x : top_left_x + self.patch_size,
+                        top_left_y : top_left_y + self.patch_size,
+                    ].sum()
+                   """
+                    att_sums[i_x][i_y] = a[:,
                         top_left_x : top_left_x + self.patch_size,
                         top_left_y : top_left_y + self.patch_size,
                     ].sum()
@@ -1491,7 +1503,7 @@ class Selectivity(Metric):
             for i_x, top_left_x in enumerate(range(0, x.shape[1], self.patch_size)):
                 for i_y, top_left_y in enumerate(range(0, x.shape[2], self.patch_size)):
 
-                    # Sum attributions for patch.
+                    # Sum attributions for patch. gnanfack_edit, same as in region perturbation
                     att_sums[i_x][i_y] = a[:,
                         top_left_x : top_left_x + self.patch_size,
                         top_left_y : top_left_y + self.patch_size,
