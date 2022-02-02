@@ -52,7 +52,8 @@ def get_results(model, name =  "Faithfulness Correlation", x_batch = None, y_bat
   assert name in metric.keys(), f"Only metrics in {metric.keys()} are allowed!!!"
   
   #Upsample images if saliency's shape != image's shape
-  a_batch = torch.nn.functional.interpolate(a_batch, x_batch.shape[-2:], mode='bilinear')
+  if a_batch.shape[-2:] != x_batch.shape[-2:]:
+      a_batch = torch.nn.functional.interpolate(a_batch, x_batch.shape[-2:], mode='bilinear')
 
   return metric[name](**hyper_param_eval[name])(model=model,
                                                 x_batch=x_batch.cpu().numpy(),
