@@ -1035,7 +1035,8 @@ class PixelFlipping(Metric):
                         "perturb_baseline": self.perturb_baseline,
                     },
                 )
-                assert_perturbation_caused_change(x=x, x_perturbed=x_perturbed)
+                #gnanfack_edit commenting the following line
+                #assert_perturbation_caused_change(x=x, x_perturbed=x_perturbed)
 
                 # Predict on perturbed input x.
                 with torch.no_grad():
