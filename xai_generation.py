@@ -186,7 +186,7 @@ def main():
 
             scores.append(scores_saliency)
 
-        scores = np.stack(scores)
+        scores = np.concatenate(scores)
 
         # save metrics in csv files
         scores_df = pd.DataFrame(data=scores, index=None, columns=None)
