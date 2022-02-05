@@ -131,6 +131,30 @@ class Sobel:
         return x
 
 
+class Gaussian:
+    def __init__(self, model, **kwargs):
+        pass
+
+    def attribute(self, inputs, target=None):
+        # Get input sizes
+        x_size, y_size = inputs.shape[-2:]
+
+        # create a 2d meshgrid from -1 to 1 with same size as input
+        x, y = torch.meshgrid(torch.linspace(-1, 1, x_size, device=inputs.device),
+                              torch.linspace(-1, 1, y_size, device=inputs.device))
+
+        # distance from the mean (center)
+        distance = torch.sqrt(x * x + y * y)
+
+        # Set sigma to 1 (mu = 0)
+        sigma = 1
+
+        # Calculating Gaussian array
+        gaussian_2d = torch.exp(- (distance ** 2 / (2.0 * sigma ** 2)))
+
+        return gaussian_2d.view(1, 1, x_size, y_size)
+
+
 ### Parameters for each method ###
 methods_dict = {
     'integratedgrad': {
@@ -181,6 +205,9 @@ methods_dict = {
     },
     'sobel': {
         'class_fn': Sobel,
+    },
+    'gaussian': {
+        'class_fn': Gaussian,
     }
 }
 
