@@ -10,6 +10,12 @@ from torchcam.methods import GradCAM
 from torchcam.methods import ScoreCAM
 from torchcam.methods import LayerCAM
 
+import sys
+
+sys.path.append("polycam")
+
+from polycam.polycam import  PCAMpm
+
 
 from torchvision.transforms import functional as Ft
 
@@ -92,6 +98,19 @@ class CAMWrapper:
             map = map[0].view(1, 1, *map[0].shape)
         return map
 
+
+### PolyCAM
+
+class PolyCAMWrapper:
+    def __init__(self,
+                 model,
+                 batch_size=16,
+                 **kwargs):
+        self.pcam = PCAMpm(model, batch_size=batch_size)
+
+    def attribute(self, inputs, target=None):
+        map = self.pcam(inputs, class_idx=target)[-1]
+        return map.detach()
 
 ### Dummy xai methods for sanity check ###
 
@@ -198,6 +217,10 @@ methods_dict = {
         'class_fn':CAMWrapper,
         'base_class': LayerCAM,
         'use_batch_size': False,
+        'layers': ['relu', 'layer1', 'layer2', 'layer3', 'layer4']
+    },
+    'polycam': {
+        'class_fn': PolyCAMWrapper,
         'layers': ['relu', 'layer1', 'layer2', 'layer3', 'layer4']
     },
     'random': {
