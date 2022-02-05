@@ -4,7 +4,10 @@ from captum.attr import NoiseTunnel
 from captum.attr import IntegratedGradients
 from captum.attr import GuidedBackprop
 
-from RISE.explanations import RISE
+try:
+    from RISE.explanations import RISE
+except:
+    print("RISE not installed. You will not be able to use it")
 
 from torchcam.methods import GradCAM
 from torchcam.methods import ScoreCAM
@@ -12,9 +15,11 @@ from torchcam.methods import LayerCAM
 
 import sys
 
-sys.path.append("polycam")
-
-from polycam.polycam import  PCAMpm
+try:
+    sys.path.append("polycam")
+    from polycam.polycam import  PCAMpm
+except:
+    print("Polycam not installed. You will not be able to use it")
 
 
 from torchvision.transforms import functional as Ft
