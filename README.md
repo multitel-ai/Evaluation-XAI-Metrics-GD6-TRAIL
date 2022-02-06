@@ -4,9 +4,10 @@
 
 * Install the requirements.txt file, for exemple: `pip install -r requirements.txt`
 * You should download the dataset files (ILSVRC2012_img_val.tar and ILSVRC2012_devkit_t12.tar.gz) inside a folder named imagenet (no need to extract, it's done automatically)
-* You should also clone RISE, using `git clone https://github.com/eclique/RISE`
 * Create a folder named npz to save npz saliency maps.
 * Create a folder csv to save metric results.
+* (Optional: If you want to use RISE, you should should also clone RISE repository, using `git clone https://github.com/eclique/RISE`)
+* (Optional: If you want to use Polycam, you should should also clone Polycam repository, using `git clone https://github.com/andralex8/polycam`)
 
 nb: It appears that "import quantus" does not work after a "pip install quantus". This is the reason why the Quantus' repository is cloned here.
 
