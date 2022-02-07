@@ -1918,6 +1918,7 @@ class IterativeRemovalOfFeatures(Metric):
         """
 
         # Update kwargs.
+        # Update kwargs.
         self.nr_channels = kwargs.get("nr_channels", np.shape(x_batch)[1])
         self.img_size = kwargs.get("img_size", np.shape(x_batch)[-1])
         self.kwargs = {
@@ -1978,8 +1979,10 @@ class IterativeRemovalOfFeatures(Metric):
 
             # Calculate average attribution of each segment.
             att_segs = np.zeros(nr_segments)
+
             for i, s in enumerate(range(nr_segments)):
-                att_segs[i] = np.mean(a[segments == s])
+                #gnanfack_edit: changing a[segments == s] to a[0][segments == s] because there is not color dim
+                att_segs[i] = np.mean(a[0][segments == s])
 
             # Sort segments based on the mean attribution (descending order).
             s_indices = np.argsort(-att_segs)
@@ -2024,8 +2027,10 @@ class IterativeRemovalOfFeatures(Metric):
 
             # self.last_results.append(1-auc(preds, np.arange(0, len(preds))))
             self.last_results.append(np.trapz(np.array(preds), dx=1.0))
+            
+        #gnanfack_edit commenting the following line to get result per image    
 
-        self.last_results = [np.mean(self.last_results)]
+        #self.last_results = [np.mean(self.last_results)]
 
         self.all_results.append(self.last_results)
 
