@@ -501,7 +501,7 @@ class MonotonicityArya(Metric):
         a_batch: Union[np.array, None],
         *args,
         **kwargs,
-    ) -> List[bool]:
+    ) -> List[float]:
         """
         This implementation represents the main logic of the metric and makes the class object callable.
         It completes batch-wise evaluation of some explanations (a_batch) with respect to some input data
@@ -628,7 +628,7 @@ class MonotonicityArya(Metric):
 
                 preds.append(y_pred_perturb)
 
-            self.last_results.append(np.all(np.diff(preds) >= 0))
+            self.last_results.append((np.diff(preds) >= 0).sum()/(len(preds)-1))
 
         self.all_results.append(self.last_results)
 
