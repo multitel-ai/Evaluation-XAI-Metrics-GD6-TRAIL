@@ -48,6 +48,13 @@ parser.add_argument("--method", type=str, default='smoothgrad',
                     help = "xai method")
 
 #########################
+### method parameters ###
+#########################
+parser.add_argument("--baseline", type=str, default='',
+                    help = 'Indicates the type of baseline: "mean", "random", "uniform", "black" or "white", '
+                           'use default by metric if not specified')
+
+#########################
 ### saving parameters ###
 #########################
 parser.add_argument("--csv_folder", type=str, default='csv',
@@ -164,6 +171,13 @@ def main():
     xai_loader = torch.utils.data.DataLoader(xai_dataset, batch_size=batch_size, shuffle = False)
 
     if not args.skip_metrics:
+        if args.baseline is '':
+            perturb_baseline = None
+            csv_baseline_suffix = ""
+        else:
+            perturb_baseline = args.baseline
+            csv_baseline_suffix= "_baseline_" + perturb_baseline
+
         for (X, y), A in tqdm(xai_loader, desc="Computing metrics"):
             # device
             if args.gpu:
@@ -182,6 +196,7 @@ def main():
                                           y_batch = y,
                                           a_batch =A,
                                           s_batch = None,
+                                          perturb_baseline = perturb_baseline,
                                           device = device)
 
             scores.append(scores_saliency)
@@ -194,9 +209,9 @@ def main():
         # save metrics in csv files
         scores_df = pd.DataFrame(data=scores, index=None, columns=None)
         if args.npz_checkpoint:
-            csv_name = args.npz_checkpoint.split('/')[-1].split('.')[0] + "_" + args.metrics + ".csv"
+            csv_name = args.npz_checkpoint.split('/')[-1].split('.')[0] + "_" + args.metrics + csv_baseline_suffix + ".csv"
         else:
-            csv_name = args.method + "_" + args.model + "_" + args.dataset_name + "_" + args.metrics + ".csv"
+            csv_name = args.method + "_" + args.model + "_" + args.dataset_name + "_" + args.metrics + csv_baseline_suffix + ".csv"
         scores_df.to_csv(path.join(args.csv_folder, csv_name), header=False, index=False)
 
 

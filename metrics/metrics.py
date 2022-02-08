@@ -9,7 +9,14 @@ import quantus
 from .hyper_parameters_metrics import hyper_param_eval
 from .meta_parameters_metrics import meta_param
 
-def get_results(model, name =  "Faithfulness Correlation", x_batch = None, y_batch = None, a_batch = None, s_batch = None, device = "cuda"):
+def get_results(model,
+                name =  "Faithfulness Correlation",
+                x_batch = None,
+                y_batch = None,
+                a_batch = None,
+                s_batch = None,
+                perturb_baseline = None,
+                device = "cuda"):
 
     metric = {
     #Faithfullness
@@ -56,7 +63,12 @@ def get_results(model, name =  "Faithfulness Correlation", x_batch = None, y_bat
     if a_batch.shape[-2:] != x_batch.shape[-2:]:
         a_batch = torch.nn.functional.interpolate(a_batch, x_batch.shape[-2:], mode='bilinear')
 
-    return metric[name](**hyper_param_eval[name])(model=model,
+    hyper_params = hyper_param_eval[name]
+
+    if perturb_baseline is not None:
+        hyper_params['perturb_baseline'] = perturb_baseline
+
+    return metric[name](**hyper_params)(model=model,
                                                   x_batch=x_batch.cpu().numpy(),
                                                   y_batch=y_batch.cpu().numpy(),
                                                   a_batch=a_batch.cpu().numpy(),
