@@ -23,7 +23,7 @@ hyper_param_eval = {
             "pixels_in_step": 28,
         },
         'Pixel-Flipping': {
-            "features_in_step": 28,
+            "features_in_step": 224,
             "perturb_baseline": "black",
             "perturb_func": quantus.baseline_replacement_by_indices,
         },
@@ -44,7 +44,7 @@ hyper_param_eval = {
         },
       'Monotonicity Nguyen': {
             "nr_samples": 10,
-            "features_in_step": 3136,
+            "features_in_step": 224,
             "perturb_baseline": "uniform",
             "perturb_func": quantus.baseline_replacement_by_indices,
         "similarity_func": quantus.correlation_spearman,
