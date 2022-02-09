@@ -171,7 +171,7 @@ def main():
     xai_loader = torch.utils.data.DataLoader(xai_dataset, batch_size=batch_size, shuffle = False)
 
     if not args.skip_metrics:
-        if args.baseline is '':
+        if args.baseline == '':
             perturb_baseline = None
             csv_baseline_suffix = ""
         else:
