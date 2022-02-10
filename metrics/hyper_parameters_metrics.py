@@ -87,7 +87,7 @@ hyper_param_eval = {
 
 #Randomisation
     'Model Parameter Randomisation':{
-         "layer_order": "bottom_up",
+         "layer_order": "top_down",
         "similarity_func": quantus.correlation_spearman,
         "normalize": True,
     },
