@@ -4,6 +4,7 @@ from captum.attr import NoiseTunnel
 from captum.attr import IntegratedGradients
 from captum.attr import GuidedBackprop
 
+# Try to load RISE, return warning if not available
 try:
     from RISE.explanations import RISE
 except:
@@ -15,6 +16,7 @@ from torchcam.methods import LayerCAM
 
 import sys
 
+# Try to load polycam, return warning if not available
 try:
     sys.path.append("polycam")
     from polycam.polycam import  PCAMpm
@@ -25,10 +27,16 @@ except:
 from torchvision.transforms import functional as Ft
 
 ### Wrapper functions ###
+# wrap the saliency method into a common shape with attribute method (similar to Captum)
 
 # Captum
 
 class SmoothGrad(NoiseTunnel):
+    """
+    SmoothGrad method using noise tunnel and saliency method
+    Smilkov, D., Thorat, N., Kim, B., Viégas, F., & Wattenberg, M. (2017). Smoothgrad: removing noise by adding noise.
+    arXiv preprint arXiv:1706.03825. https://arxiv.org/abs/1706.03825
+    """
     def __init__(self, model, batch_size=16, **kwargs):
         self.saliency = captum.attr.Saliency(model)
         self.batch_size = batch_size
@@ -42,6 +50,9 @@ class SmoothGrad(NoiseTunnel):
 
 
 class GradWrapper:
+    """
+    Wrapper for gradient based methods (IntegratedGrad and GuidedBackProp, ...)
+    """
     def __init__(self, model, method_name='integratedgrad', batch_size=16, **kwargs):
         self.method_name = method_name
         self.batch_size = batch_size
@@ -62,6 +73,11 @@ class GradWrapper:
 # Rise
 
 class Rise:
+    """
+    Wrapper for RISE method
+    Petsiuk, V., Das, A., & Saenko, K. (2018). Rise: Randomized input sampling for explanation of black-box models.
+    arXiv preprint arXiv:1806.07421. https://arxiv.org/abs/1806.07421
+    """
     def __init__(self, model, input_size=224, batch_size=16, **kwargs):
         params = methods_dict['rise']['params_attr']
         self.rise = RISE(model, (input_size, input_size), batch_size)
@@ -76,6 +92,9 @@ class Rise:
 # Torchcam
 
 class CAMWrapper:
+    """
+    Wrapper for the CAM based methods from TorchCAM ( https://github.com/frgfm/torch-cam )s
+    """
     def __init__(self,
                  model,
                  method_name='gradcam',
@@ -107,6 +126,10 @@ class CAMWrapper:
 ### PolyCAM
 
 class PolyCAMWrapper:
+    """
+    Wrapper for PolyCAM
+    https://github.com/andralex8/polycam
+    """
     def __init__(self,
                  model,
                  batch_size=16,
@@ -156,6 +179,9 @@ class Sobel:
 
 
 class Gaussian:
+    """
+    Centered Gaussian 2D
+    """
     def __init__(self, model, **kwargs):
         pass
 
@@ -241,5 +267,12 @@ methods_dict = {
 
 
 def get_method(name, model, batch_size=16):
+    """
+    Get the corresponding method
+    :param name: name of the method to return
+    :param model: model to explain
+    :param batch_size: size of the internal batch (used by methods using internal batch size)
+    :return: method class
+    """
     cur_dict = methods_dict[name]
     return cur_dict["class_fn"](model, method_name=name, batch_size=batch_size)
