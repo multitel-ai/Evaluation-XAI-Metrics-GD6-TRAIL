@@ -9,6 +9,7 @@ from torchvision import transforms
 
 from torchvision.datasets.imagenet import ImageNet
 
+# dict containing datasets information and parameters
 datasets_dict = {
     'imagenet': {
         'class_fn': ImageNet,
@@ -25,6 +26,12 @@ datasets_dict = {
 
 
 def get_dataset(name, root):
+    """
+    Return the Dataset by name
+    :param name: name of the dataset to return
+    :param root: path to the folder containing all the datasets
+    :return: Dataset
+    """
     cur_dict = datasets_dict[name]
     dataset = cur_dict["class_fn"](path.join(root, name), split=cur_dict['split'], transform=cur_dict["transform"])
 
@@ -39,6 +46,10 @@ def get_dataset(name, root):
 
 
 class XAIDataset(Dataset):
+    """
+    Dataset combining the image Dataset with the saliency maps
+    return a tuple of [image, map]
+    """
     def __init__(self, dataset, xai):
         self.dataset = dataset
         self.xai = xai
