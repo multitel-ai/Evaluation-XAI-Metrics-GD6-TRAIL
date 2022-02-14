@@ -96,7 +96,7 @@ parser.add_argument("--metrics", type=str, default="Faithfulness Correlation", h
 
 
 def main():
-    # Get arguements
+    # Get arguments
     global args
     args = parser.parse_args()
     batch_size = args.batch_size
@@ -114,9 +114,9 @@ def main():
     model = get_model(args.model, n_output)
     model = model.eval()
 
+    # Use GPU
     if args.gpu:
         model = model.cuda()
-
     
     # Get method if no checkpoint provided
     if args.npz_checkpoint:
@@ -124,22 +124,20 @@ def main():
     else:
         method= get_method(args.method, model, batch_size=args.batch_size)
 
-    #Checking accuracy
-    #acc_check = accuracy_checking(model, dataset)
-    #print("[Check] Accuracy: ", acc_check)
-
-    # Limit val size
+    # Limit validation size if required in arguments (mostly for debugging purpose)
     if args.limit_val != 0:
         subset_indices  = np.random.randint(0, high=(len(dataset)-1), size=min(args.limit_val, len(dataset)))
         subset = torch.utils.data.Subset(dataset, subset_indices)
     else:
         subset = dataset
 
+    # Get dataloader for generating the maps
     val_loader = torch.utils.data.DataLoader(subset, batch_size=batch_size, shuffle = False)
 
     scores = []
     saliencies_maps = []
 
+    # Load precomputed maps if a checkpoint is specified, generate them otherwise
     if args.npz_checkpoint:
         print("loading saliencies maps from npz")
         try:
@@ -149,6 +147,7 @@ def main():
     else:
         for X, y in tqdm(val_loader, total=len(val_loader), desc = "Generating saliency maps"):
 
+            # Store images and labels to GPU
             if args.gpu:
                 X = X.cuda()
                 y = y.cuda()
@@ -160,17 +159,22 @@ def main():
 
                 saliencies_maps.append(saliency_map)
 
+        # Convert the list of maps into one tensor
         saliencies_maps = torch.stack(saliencies_maps)
 
+        # Save the maps into a npz file if required
         if args.save_npz:
             print("saving saliencies to npz")
             npz_name = args.method + "_" + args.model + "_" + args.dataset_name
             np.savez(path.join(args.npz_folder, npz_name), saliencies_maps.cpu().numpy())
 
+    # Create a XAI dataset and loader. Useful to get the image with the corresponding map
     xai_dataset = XAIDataset(subset, saliencies_maps)
     xai_loader = torch.utils.data.DataLoader(xai_dataset, batch_size=batch_size, shuffle = False)
 
+    # Compute metrics or skip it if required (in case of only generation)
     if not args.skip_metrics:
+        # Perturbation baseline choose, this change the default baseline for metrics using perturb_baseline parameter
         if args.baseline == '':
             perturb_baseline = None
             csv_baseline_suffix = ""
@@ -201,6 +205,7 @@ def main():
 
             scores.append(scores_saliency)
 
+        # Stack results by batches if the results are dict, else concatenate them by images
         if isinstance(scores[0], dict):
             scores = np.stack(scores)
         else:
