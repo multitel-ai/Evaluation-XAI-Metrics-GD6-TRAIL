@@ -199,7 +199,6 @@ def main():
                                           x_batch = X,
                                           y_batch = y,
                                           a_batch =A,
-                                          s_batch = None,
                                           perturb_baseline = perturb_baseline,
                                           device = device)
 
