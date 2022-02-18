@@ -15,6 +15,7 @@ def get_results(model,
                 y_batch = None,
                 a_batch = None,
                 perturb_baseline = None,
+                xai_method = None,
                 device = "cuda"):
     """
     compute a metric for a batch and get results
@@ -80,9 +81,16 @@ def get_results(model,
     if perturb_baseline is not None:
         hyper_params['perturb_baseline'] = perturb_baseline
 
+    meta_params = meta_param(name, device)
+
+    #Adding the XAI method
+    if xai_method is not None:
+        meta_params["explain_func"] = xai_method
+
+    print(meta_params)
     # Compute and return the metric
     return metric[name](**hyper_params)(model=model,
                                                   x_batch=x_batch.cpu().numpy(),
                                                   y_batch=y_batch.cpu().numpy(),
                                                   a_batch=a_batch.cpu().numpy(),
-                                                  **meta_param(name, device))
+                                                  **meta_params)

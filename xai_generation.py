@@ -172,6 +172,8 @@ def main():
     xai_dataset = XAIDataset(subset, saliencies_maps)
     xai_loader = torch.utils.data.DataLoader(xai_dataset, batch_size=batch_size, shuffle = False)
 
+
+
     # Compute metrics or skip it if required (in case of only generation)
     if not args.skip_metrics:
         # Perturbation baseline choose, this change the default baseline for metrics using perturb_baseline parameter
@@ -194,13 +196,21 @@ def main():
             s_batch: batch of masks for localisation metrics
             
             """
+
+            #get image shape
+            img_shape = X[0].shape
+            print(img_shape)
             scores_saliency = get_results(model,
                                           name = args.metrics,
                                           x_batch = X,
                                           y_batch = y,
                                           a_batch =A,
                                           perturb_baseline = perturb_baseline,
-                                          device = device)
+                                          device = device,
+                                          xai_method = lambda model, inputs, targets, 
+                                                           **kwargs: get_method(args.method, model, batch_size=args.batch_size)
+                                                                     .attribute(torch.Tensor(inputs.reshape(X[0].shape)).unsqueeze(0), target = targets)
+                                                                     .sum(1))
 
             scores.append(scores_saliency)
 
