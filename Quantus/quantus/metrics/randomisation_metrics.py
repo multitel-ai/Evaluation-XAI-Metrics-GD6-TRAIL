@@ -121,9 +121,13 @@ class ModelParameterRandomisation(Metric):
         self.kwargs = {
             **kwargs,
             **{k: v for k, v in self.__dict__.items() if k not in ["args", "kwargs"]},
+            #gnanfack_edit adding batch size
+            "batch_size" : x_batch.shape[0],
         }
         self.last_results = {}
-
+        #gnanfack_edit adding batch size
+        self.batch_size = x_batch.shape[0]
+        
         # Get explanation function and make asserts.
         explain_func = self.kwargs.get("explain_func", Callable)
         assert_explain_func(explain_func=explain_func)
@@ -156,7 +160,7 @@ class ModelParameterRandomisation(Metric):
 
             # Generate an explanation with perturbed model.
             a_perturbed = explain_func(
-                model=model, inputs=x_batch, targets=y_batch, **self.kwargs
+                model=model, inputs=x_batch, targets=y_batch, **self.kwargs 
             )
 
             for sample, (a, a_per) in enumerate(zip(a_batch, a_perturbed)):
@@ -277,9 +281,13 @@ class RandomLogit(Metric):
         # Update kwargs.
         self.nr_channels = kwargs.get("nr_channels", np.shape(x_batch)[1])
         self.img_size = kwargs.get("img_size", np.shape(x_batch)[-1])
+
+
         self.kwargs = {
             **kwargs,
             **{k: v for k, v in self.__dict__.items() if k not in ["args", "kwargs"]},
+                    #gnanfack_edit adding batch size
+            "batch_size" : x_batch.shape[0],
         }
         self.last_results = [dict() for _ in x_batch]
 

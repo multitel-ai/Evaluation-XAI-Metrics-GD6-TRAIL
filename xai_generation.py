@@ -198,8 +198,8 @@ def main():
             """
 
             #get image shape
-            img_shape = X[0].shape
-            print(img_shape)
+            img_shape = list(X[0].shape)
+
             scores_saliency = get_results(model,
                                           name = args.metrics,
                                           x_batch = X,
@@ -207,10 +207,9 @@ def main():
                                           a_batch =A,
                                           perturb_baseline = perturb_baseline,
                                           device = device,
-                                          xai_method = lambda model, inputs, targets, 
-                                                           **kwargs: get_method(args.method, model, batch_size=args.batch_size)
-                                                                     .attribute(torch.Tensor(inputs.reshape(X[0].shape)).unsqueeze(0), target = targets)
-                                                                     .sum(1))
+                                          xai_method = lambda model, inputs, targets, batch_size = 1,
+                                                           **kwargs: XAI_for_Quantus(args.method, model, inputs, targets, img_shape, device, batch_size)
+                                        )
 
             scores.append(scores_saliency)
 
@@ -243,6 +242,25 @@ def accuracy_checking(model, dataset, nr_samples = 100):
             break
 
     return correct.cpu().detach().numpy()*100/(nr_samples)
+
+def XAI_for_Quantus(method, model, inputs, targets, img_shape,  device, batch_size):
+    XAI_method = get_method(method, model)
+    list_maps = []
+
+    for i in range(batch_size):
+        maps = XAI_method.attribute(torch.Tensor(inputs.reshape([batch_size] + img_shape)[i]).unsqueeze(0).to(device),
+                                target = torch.Tensor(targets)[i]).sum(1)
+        list_maps.append(maps)
+
+    list_maps = torch.stack(list_maps)
+
+    #Upsample images if saliency's shape != image's shape
+    if list_maps.shape[-2:] != img_shape[-2:]:
+        list_maps = torch.nn.functional.interpolate(list_maps, img_shape[-2:], mode='bilinear')
+
+    return list_maps.cpu().numpy()
+
+
 
 
 if __name__ == "__main__":

@@ -86,8 +86,7 @@ def get_results(model,
     #Adding the XAI method
     if xai_method is not None:
         meta_params["explain_func"] = xai_method
-
-    print(meta_params)
+        
     # Compute and return the metric
     return metric[name](**hyper_params)(model=model,
                                                   x_batch=x_batch.cpu().numpy(),
