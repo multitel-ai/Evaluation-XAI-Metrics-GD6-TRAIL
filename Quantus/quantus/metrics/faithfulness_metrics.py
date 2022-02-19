@@ -176,7 +176,7 @@ class FaithfulnessCorrelation(Metric):
                 # Randomly mask by subset size.
                 a_ix = np.random.choice(a.shape[0], self.subset_size, replace=False)
                 x_perturbed = self.perturb_func(
-                    img=x.flatten(),
+                    img=x.reshape((-1, a.shape[0])),
                     **{
                         "indices": a_ix,
                         "perturb_baseline": self.perturb_baseline,
@@ -391,7 +391,7 @@ class FaithfulnessEstimate(Metric):
                     )
                 ]
                 x_perturbed = self.perturb_func(
-                    img=x.flatten(),
+                    img=x.reshape((-1, a.shape[0])),
                     **{
                         "indices": a_ix,
                         "perturb_baseline": self.perturb_baseline,
@@ -593,7 +593,7 @@ class MonotonicityArya(Metric):
                 torch.Tensor()
                 .new_full(size=x.shape, fill_value=baseline_value)
                 .numpy()
-                .flatten()
+                .reshape((-1, a.shape[0]))
             )
 
             for i_ix, a_ix in enumerate(a_indices[:: self.features_in_step]):
@@ -606,7 +606,7 @@ class MonotonicityArya(Metric):
                 ]
                 x_baseline = self.perturb_func(
                     img=x_baseline,
-                    **{"indices": a_ix, "fixed_values": x.flatten()[a_ix]},
+                    **{"indices": a_ix, "fixed_values": x.reshape((-1, a.shape[0]))[:, a_ix]},
                 )
 
                 # Predict on perturbed input x (that was initially filled with a constant 'perturb_baseline' value).
@@ -826,7 +826,7 @@ class MonotonicityNguyen(Metric):
                 for n in range(self.nr_samples):
 
                     x_perturbed = self.perturb_func(
-                        img=x.flatten(),
+                        img=x.reshape((-1, a.shape[0])),
                         **{
                             "indices": a_ix,
                             "perturb_baseline": self.perturb_baseline,
@@ -1018,7 +1018,7 @@ class PixelFlipping(Metric):
             a_indices = np.argsort(-a)
 
             preds = []
-            x_perturbed = x.copy().flatten()
+            x_perturbed = x.copy().reshape((-1, a.shape[0]))
 
             for i_ix, a_ix in enumerate(a_indices[:: self.features_in_step]):
 
@@ -1752,7 +1752,7 @@ class SensitivityN(Metric):
 
             att_sums = []
             pred_deltas = []
-            x_perturbed = x.copy().flatten()
+            x_perturbed = x.copy().reshape((-1, a.shape[0]))
 
             for i_ix, a_ix in enumerate(a_indices[:: self.features_in_step]):
 
@@ -1982,7 +1982,7 @@ class IterativeRemovalOfFeatures(Metric):
 
             for i, s in enumerate(range(nr_segments)):
                 #gnanfack_edit: changing a[segments == s] to a[0][segments == s] because there is not color dim
-                att_segs[i] = np.mean(a[0][segments == s])
+                att_segs[i] = np.mean(a[:, segments == s])
 
             # Sort segments based on the mean attribution (descending order).
             s_indices = np.argsort(-att_segs)
@@ -1992,12 +1992,10 @@ class IterativeRemovalOfFeatures(Metric):
             for i_ix, s_ix in enumerate(s_indices):
 
                 # Perturb input by indices of attributions.
-                a_ix = np.nonzero(
-                    np.repeat((segments == s_ix).flatten(), self.nr_channels)
-                )[0]
+                a_ix = (segments == s_ix).flatten()
 
                 x_perturbed = self.perturb_func(
-                    img=x.flatten(),
+                    img=x.reshape((self.nr_channels, -1)),
                     **{
                         "indices": a_ix,
                         "perturb_baseline": self.perturb_baseline,
