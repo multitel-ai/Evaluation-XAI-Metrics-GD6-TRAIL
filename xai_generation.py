@@ -249,7 +249,7 @@ def XAI_for_Quantus(method, model, inputs, targets, img_shape,  device, batch_si
 
     for i in range(batch_size):
         maps = XAI_method.attribute(torch.Tensor(inputs.reshape([batch_size] + img_shape)[i]).unsqueeze(0).to(device),
-                                target = torch.Tensor(targets)[i]).sum(1)
+                                target = np.array(targets).reshape((batch_size,))[i]).sum(1)
         list_maps.append(maps)
 
     list_maps = torch.stack(list_maps)
