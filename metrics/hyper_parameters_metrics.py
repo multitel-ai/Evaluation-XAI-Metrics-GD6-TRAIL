@@ -159,3 +159,10 @@ hyper_param_eval = {
 
 }
 
+
+metric_types = {
+    
+    "robustness": ['Local Lipschitz Estimate', 'Avg-Sensitivity', "Max-Sensitivity", 'Continuity Test'],
+    "randomisation": ['Model Parameter Randomisation',  'Random Logit']
+}
+

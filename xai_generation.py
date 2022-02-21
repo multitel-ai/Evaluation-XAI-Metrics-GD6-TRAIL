@@ -18,11 +18,13 @@ from datasets import get_dataset, XAIDataset
 from models import get_model
 from methods import get_method
 from metrics import get_results
+from metrics import metric_types
 
 
 sys.path.append("Quantus")
 
 import quantus
+
 
 
 parser = argparse.ArgumentParser(description="Generate xai maps")
@@ -100,6 +102,7 @@ def main():
     global args
     args = parser.parse_args()
     batch_size = args.batch_size
+    global XAI_method
 
     # Seed everything
     random.seed(args.seed)
@@ -172,7 +175,9 @@ def main():
     xai_dataset = XAIDataset(subset, saliencies_maps)
     xai_loader = torch.utils.data.DataLoader(xai_dataset, batch_size=batch_size, shuffle = False)
 
-
+    #Defining XAI_method for robustness and randomisation
+    if args.metrics in metric_types["robustness"] or args.metrics in metric_types["randomisation"]:
+        XAI_method = get_method(args.method, model)
 
     # Compute metrics or skip it if required (in case of only generation)
     if not args.skip_metrics:
@@ -197,9 +202,6 @@ def main():
             
             """
 
-            #get image shape
-            img_shape = list(X[0].shape)
-
             scores_saliency = get_results(model,
                                           name = args.metrics,
                                           x_batch = X,
@@ -207,8 +209,8 @@ def main():
                                           a_batch =A,
                                           perturb_baseline = perturb_baseline,
                                           device = device,
-                                          xai_method = lambda model, inputs, targets, batch_size = 1,
-                                                           **kwargs: XAI_for_Quantus(args.method, model, inputs, targets, img_shape, device, batch_size)
+                                          xai_method = XAI_for_Quantus, #lambda model, inputs, targets, batch_size = 1,
+                                                        #   **kwargs: XAI_for_Quantus(args.method, model, inputs, targets, img_shape, device, batch_size)
                                         )
 
             scores.append(scores_saliency)
@@ -243,13 +245,20 @@ def accuracy_checking(model, dataset, nr_samples = 100):
 
     return correct.cpu().detach().numpy()*100/(nr_samples)
 
-def XAI_for_Quantus(method, model, inputs, targets, img_shape,  device, batch_size):
-    XAI_method = get_method(method, model)
-    list_maps = []
+def XAI_for_Quantus(model, inputs, targets, device, batch_size=1, img_shape = [3, 224,224], **kwargs):
 
+    list_maps = []
+    #os.system("nvidia-smi")
+
+    X = torch.tensor(inputs.reshape([batch_size] + img_shape), dtype=torch.float).to(device)
+    y = torch.tensor(np.array(targets).reshape((batch_size,))).to(device)
+
+    #os.system("nvidia-smi")
+    torch.cuda.empty_cache()
     for i in range(batch_size):
-        maps = XAI_method.attribute(torch.Tensor(inputs.reshape([batch_size] + img_shape)[i]).unsqueeze(0).to(device),
-                                target = np.array(targets).reshape((batch_size,))[i]).sum(1)
+        
+        maps = XAI_method.attribute(X[i].unsqueeze(0),
+                                target = y[i]).sum(1)
         list_maps.append(maps)
 
     list_maps = torch.stack(list_maps)
