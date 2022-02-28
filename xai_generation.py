@@ -93,6 +93,12 @@ parser.add_argument("--limit_val", type=int, default=0,
 parser.add_argument("--batch_size", type=int, default=16,
                     help="Batch size")
 
+parser.add_argument("--start_idx", type=int, default=0,
+                    help="Starting index for subset metric computation")
+parser.add_argument("--end_idx", type=int, default=0,
+                    help="Stop index for subset metric computation")
+
+
 
 parser.add_argument("--metrics", type=str, default="Faithfulness Correlation", help = "metrics used for benchmarking")
 
@@ -173,6 +179,12 @@ def main():
 
     # Create a XAI dataset and loader. Useful to get the image with the corresponding map
     xai_dataset = XAIDataset(subset, saliencies_maps)
+
+    if args.end_idx != 0 and args.end_idx > args.start_idx:
+        xai_dataset = torch.utils.data.Subset(xai_dataset, list(range(args.start_idx, args.end_idx)))
+        subset_suffix = "_" + str(args.start_idx) + "_" + str(args.end_idx)
+    else:
+        subset_suffix = ""
     xai_loader = torch.utils.data.DataLoader(xai_dataset, batch_size=batch_size, shuffle = False)
 
     #Defining XAI_method for robustness and randomisation
@@ -224,9 +236,9 @@ def main():
         # save metrics in csv files
         scores_df = pd.DataFrame(data=scores, index=None, columns=None)
         if args.npz_checkpoint:
-            csv_name = args.npz_checkpoint.split('/')[-1].split('.')[0] + "_" + args.metrics + csv_baseline_suffix + ".csv"
+            csv_name = args.npz_checkpoint.split('/')[-1].split('.')[0] + "_" + args.metrics + csv_baseline_suffix + subset_suffix + ".csv"
         else:
-            csv_name = args.method + "_" + args.model + "_" + args.dataset_name + "_" + args.metrics + csv_baseline_suffix + ".csv"
+            csv_name = args.method + "_" + args.model + "_" + args.dataset_name + "_" + args.metrics + csv_baseline_suffix + subset_suffix + ".csv"
         scores_df.to_csv(path.join(args.csv_folder, csv_name), header=False, index=False)
 
 
