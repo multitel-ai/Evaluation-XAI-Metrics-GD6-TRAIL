@@ -120,6 +120,7 @@ class CAMWrapper:
             map = map.view(1, 1, *map.shape)
         else:
             map = map[0].view(1, 1, *map[0].shape)
+        map = map.nan_to_num()
         return map
 
 
