@@ -23,6 +23,13 @@ try:
 except:
     print("Polycam not installed. You will not be able to use it")
 
+# Try to load CAMERAS, return warning if not available
+try:
+    from CAMERAS.CAMERAS import CAMERAS
+except:
+    print("CAMERAS not installed. You will not be able to use it")
+
+
 
 from torchvision.transforms import functional as Ft
 
@@ -141,6 +148,24 @@ class PolyCAMWrapper:
         map = self.pcam(inputs, class_idx=target)[-1]
         return map.detach()
 
+
+### CAMERAS
+
+class CAMERASWrapper:
+    """
+    Wrapper for CAMERAS
+    https://github.com/VisMIL/CAMERAS
+    """
+    def __init__(self,
+                 model,
+                 **kwargs):
+        self.cameras = CAMERAS(model=model, targetLayerName=methods_dict["cameras"]['layer'])
+
+    def attribute(self, inputs, target=None):
+        map = self.cameras.run(inputs, classOfInterest=target)
+        map = map.view(1, 1, *map.shape)
+        return map.detach()
+
 ### Dummy xai methods for sanity check ###
 
 class Random:
@@ -254,6 +279,10 @@ methods_dict = {
     'polycam': {
         'class_fn': PolyCAMWrapper,
         'layers': ['relu', 'layer1', 'layer2', 'layer3', 'layer4']
+    },
+    'cameras': {
+        'class_fn': CAMERASWrapper,
+        'layer': 'layer4',
     },
     'random': {
         'class_fn': Random,
