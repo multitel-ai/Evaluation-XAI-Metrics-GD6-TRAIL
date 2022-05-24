@@ -14,6 +14,8 @@ from torchcam.methods import GradCAM
 from torchcam.methods import ScoreCAM
 from torchcam.methods import LayerCAM
 
+import torchvision
+
 import sys
 
 # Try to load polycam, return warning if not available
@@ -28,6 +30,11 @@ try:
     from CAMERAS.CAMERAS import CAMERAS
 except:
     print("CAMERAS not installed. You will not be able to use it")
+
+try:
+    from torchray.attribution.extremal_perturbation import extremal_perturbation, contrastive_reward
+except:
+    print("TorchRay not installed. You will not be able to use extremal perturbation")
 
 
 
@@ -166,6 +173,42 @@ class CAMERASWrapper:
         map = map.view(1, 1, *map.shape)
         return map.detach()
 
+
+### Extremal perturbation
+
+class EPWrapper:
+    """
+    Wrapper for Extremal perturbation from TorchRay
+    Use the technique described by the authors to obtain a saliency maps by fusing multiple masks
+    https://arxiv.org/pdf/1910.08485.pdf
+    """
+    def __init__(self,
+                 model,
+                 **kwargs):
+        self.model = model
+
+    def attribute(self, inputs, target=None):
+        masks, _ = extremal_perturbation(
+            self.model, inputs, int(target),
+            reward_func=contrastive_reward,
+            areas=methods_dict["extremal_perturbation"]["areas"],
+        )
+        # Sum the masks for multiple areas to get a saliency map
+        saliency = masks.sum(0)
+
+        # Gaussian filter with standard deviation equal to 9% of the shorter size of the image
+        ## Get a the size of 9% the min size of the image
+        kernel_size = int(min(inputs.shape[-2:])*0.09)
+        ## Ensure kernel is odd number and convert to tuple
+        kernel_size = kernel_size + (1 - kernel_size % 2)
+        kernal_size = [kernel_size, kernel_size]
+
+        ## Smooth with gaussian filter
+        saliency = torchvision.transforms.functional.gaussian_blur(saliency, kernel_size=kernal_size)
+
+        return saliency.view(1, 1, *saliency.shape[-2:])
+
+
 ### Dummy xai methods for sanity check ###
 
 class Random:
@@ -283,6 +326,10 @@ methods_dict = {
     'cameras': {
         'class_fn': CAMERASWrapper,
         'layer': 'layer4',
+    },
+    'extremal_perturbation': {
+        'class_fn': EPWrapper,
+        'areas': [0.05, 0.1, 0.2, 0.4, 0.6, 0.8],
     },
     'random': {
         'class_fn': Random,
