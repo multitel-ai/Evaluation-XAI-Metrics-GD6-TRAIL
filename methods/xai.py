@@ -117,12 +117,15 @@ class CAMWrapper:
         self.method_name = method_name
         self.model = model
         if methods_dict[method_name]['use_batch_size']:
-            self.xai_method = methods_dict[method_name]['base_class'](model, batch_size=batch_size)
+            self.xai_method = methods_dict[method_name]['base_class'](model,
+                                                                      batch_size=batch_size,
+                                                                      target_layer = models_dict[type(model)]['layers'][-1])
         elif method_name == 'layercam':
             self.xai_method = methods_dict[method_name]['base_class'](model,
-                                                                      target_layer=methods_dict[method_name]['layers'])
+                                                                      target_layer=models_dict[type(model)]['layers'])
         else:
-            self.xai_method = methods_dict[method_name]['base_class'](model)
+            self.xai_method = methods_dict[method_name]['base_class'](model,
+                                                                      target_layer=models_dict[type(model)]['layers'][-1])
 
     def attribute(self, inputs, target=None):
         torch.set_grad_enabled(True)
@@ -149,7 +152,7 @@ class PolyCAMWrapper:
                  model,
                  batch_size=16,
                  **kwargs):
-        self.pcam = PCAMpm(model, batch_size=batch_size)
+        self.pcam = PCAMpm(model, batch_size=batch_size, target_layer_list=models_dict[type(model)]['layers'])
 
     def attribute(self, inputs, target=None):
         map = self.pcam(inputs, class_idx=target)[-1]
@@ -166,7 +169,7 @@ class CAMERASWrapper:
     def __init__(self,
                  model,
                  **kwargs):
-        self.cameras = CAMERAS(model=model, targetLayerName=methods_dict["cameras"]['layer'])
+        self.cameras = CAMERAS(model=model, targetLayerName=models_dict[type(model)]['layers'][-1])
 
     def attribute(self, inputs, target=None):
         map = self.cameras.run(inputs, classOfInterest=target)
@@ -317,15 +320,12 @@ methods_dict = {
         'class_fn':CAMWrapper,
         'base_class': LayerCAM,
         'use_batch_size': False,
-        'layers': ['relu', 'layer1', 'layer2', 'layer3', 'layer4']
     },
     'polycam': {
         'class_fn': PolyCAMWrapper,
-        'layers': ['relu', 'layer1', 'layer2', 'layer3', 'layer4']
     },
     'cameras': {
         'class_fn': CAMERASWrapper,
-        'layer': 'layer4',
     },
     'extremal_perturbation': {
         'class_fn': EPWrapper,
@@ -340,6 +340,15 @@ methods_dict = {
     'gaussian': {
         'class_fn': Gaussian,
     }
+}
+
+models_dict = {
+    torchvision.models.resnet.ResNet: {
+        'layers': ['relu', 'layer1', 'layer2', 'layer3', 'layer4'],
+    },
+    torchvision.models.vgg.VGG: {
+        'layers': ['features.3', 'features.8', 'features.15', 'features.22', 'features.29'],
+    },
 }
 
 
