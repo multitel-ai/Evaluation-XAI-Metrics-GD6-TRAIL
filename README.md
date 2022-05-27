@@ -8,6 +8,8 @@
 * Create a folder csv to save metric results.
 * (Optional: If you want to use RISE, you should should also clone RISE repository, using `git clone https://github.com/eclique/RISE`)
 * (Optional: If you want to use Polycam, you should should also clone Polycam repository, using `git clone https://github.com/andralex8/polycam`)
+* (Optional: If you want to use CAMERAS, you should should also clone CAMERAS repository, using `git clone https://github.com/VisMIL/CAMERAS`)
+* (Optional: If you want to use Extremal perturbation, you should should also install TorchRay, `pip install torchray`)
 
 nb: It appears that "import quantus" does not work after a "pip install quantus". This is the reason why the Quantus' repository is cloned here.
 

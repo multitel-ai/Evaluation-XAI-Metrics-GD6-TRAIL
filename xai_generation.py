@@ -131,7 +131,7 @@ def main():
     if args.npz_checkpoint:
         method = None
     else:
-        method= get_method(args.method, model, batch_size=args.batch_size)
+        method=get_method(args.method, model, batch_size=args.batch_size)
 
     # Limit validation size if required in arguments (mostly for debugging purpose)
     if args.limit_val != 0:
