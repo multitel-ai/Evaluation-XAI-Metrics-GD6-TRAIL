@@ -2,3 +2,15 @@ csv/
 imagenet/
 npz/
 .ipynb_checkpoints/
+__pycache__/
+
+analyzeTests.ipynb
+commandesTransfertCSV.txt
+csv.zip
+csvAnalysis.ipynb
+csv_merged/
+csv_merged_rebuttal/
+csv_new/
+csv_old/
+old_csv/
+
