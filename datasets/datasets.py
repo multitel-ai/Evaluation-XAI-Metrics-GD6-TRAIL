@@ -8,6 +8,7 @@ from torch.utils.data import Dataset
 from torchvision import transforms
 
 from torchvision.datasets.imagenet import ImageNet
+from torchvision.datasets.cifar import CIFAR10
 
 # dict containing datasets information and parameters
 datasets_dict = {
@@ -22,6 +23,25 @@ datasets_dict = {
             transforms.Normalize( (0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
         ])
     },
+#     'mnist': {
+#         'class_fn': MNIST,
+#         'n_output': 10,
+#         'train': False,
+#         'transform': transforms.Compose([
+#             transforms.ToTensor(),
+#              transforms.Normalize((0.1307,), (0.3081,)),
+#         ])
+    
+#     },
+    'cifar10': {
+        'class_fn': CIFAR10,
+        'n_output': 10, 
+        'train': False,
+        'transform': transforms.Compose([
+            transforms.ToTensor(), 
+            transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
+        ])
+    }
 }
 
 
@@ -33,7 +53,10 @@ def get_dataset(name, root):
     :return: Dataset
     """
     cur_dict = datasets_dict[name]
-    dataset = cur_dict["class_fn"](path.join(root, name), split=cur_dict['split'], transform=cur_dict["transform"])
+    if name=='imagenet':
+        dataset = cur_dict["class_fn"](path.join(root, name), split=cur_dict['split'], transform=cur_dict["transform"])
+    elif name=='cifar10':
+        dataset = cur_dict["class_fn"](path.join(root, name), train=cur_dict['train'], transform=cur_dict["transform"], download=True)
 
     try:
         print("Use preselected indexes")

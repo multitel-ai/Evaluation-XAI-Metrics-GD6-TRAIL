@@ -15,6 +15,7 @@ from torchcam.methods import ScoreCAM
 from torchcam.methods import LayerCAM
 
 import torchvision
+import PyTorch_CIFAR10
 
 import sys
 
@@ -349,6 +350,13 @@ models_dict = {
     torchvision.models.vgg.VGG: {
         'layers': ['features.3', 'features.8', 'features.15', 'features.22', 'features.29'],
     },
+    PyTorch_CIFAR10.cifar10_models.vgg.VGG: {
+        'layers': ['features.5', 'features.12', 'features.22', 'features.32', 'features.42'],
+    },
+    PyTorch_CIFAR10.cifar10_models.resnet.ResNet: {
+        'layers': ['relu', 'layer1', 'layer2', 'layer3', 'layer4'],
+    }
+    
 }
 
 
