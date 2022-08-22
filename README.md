@@ -17,7 +17,6 @@ nb: It appears that "import quantus" does not work after a "pip install quantus"
 * Clone the github repository with pretrained CIFAR10 models `git clone https://github.com/huyvnphan/PyTorch_CIFAR10.git`
 * Download the weights of the models: `python weightsDownloadCIFAR.py`
 * The dataset is downloaded automatically when using the script usage below.
-* Specify the use of CIFAR10 pretrained models in the script usage below with '--model cif-vgg16' or '--model cif-resnet50'.
 
 ## Script usage
 
