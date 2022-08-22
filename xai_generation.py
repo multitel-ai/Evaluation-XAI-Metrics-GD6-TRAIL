@@ -120,7 +120,7 @@ def main():
     dataset, n_output = get_dataset(args.dataset_name, args.dataset_root)
 
     # Get model
-    model = get_model(args.model, n_output)
+    model = get_model(args.model, n_output, dataset=args.dataset_name)
     model = model.eval()
 
     # Use GPU
