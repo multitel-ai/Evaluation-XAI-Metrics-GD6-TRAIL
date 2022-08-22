@@ -6,7 +6,7 @@ sys.path.append("Quantus")
 import quantus
 
 
-from .hyper_parameters_metrics import hyper_param_eval
+from .hyper_parameters_metrics import get_hyper_param_eval
 from .meta_parameters_metrics import meta_param
 
 def get_results(model,
@@ -75,6 +75,7 @@ def get_results(model,
         a_batch = torch.nn.functional.interpolate(a_batch, x_batch.shape[-2:], mode='bilinear')
 
     # get hyperparameters for the metric
+    hyper_param_eval = get_hyper_param_eval(img_size=x_batch.shape[-2], num_classes=y_batch.shape[-1])
     hyper_params = hyper_param_eval[name]
 
     # Replace the perturabation baseline if specified
