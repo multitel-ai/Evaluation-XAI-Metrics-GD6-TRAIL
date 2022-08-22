@@ -18,12 +18,11 @@ models_dict = {
 def get_model(name, n_output, checkpoint=None, pretrained=True):
     cur_dict = models_dict[name]
 
-    # use pretrained network only in absence of checkpoint
-    if checkpoint:
-        model = cur_dict['class_fn'](pretrained=False)
-    else:
-        print("Loading the pretrained model...")
-        model = cur_dict['class_fn'](pretrained=pretrained)
+    model = cur_dict['class_fn'](pretrained=False)
+
+    if not checkpoint and pretrained:
+        state_dict = torch.hub.load_state_dict_from_url(cur_dict['url'])
+        model.load_state_dict(state_dict)
 
     # change classifier to the correct size
     print("Creating a new FC layer...")
@@ -34,6 +33,7 @@ def get_model(name, n_output, checkpoint=None, pretrained=True):
 
     # load checkpoint
     if checkpoint:
-        model.load_state_dict(torch.load(checkpoint))
+        state_dict = torch.load(checkpoint)
+        model.load_state_dict(state_dict)
 
     return model
