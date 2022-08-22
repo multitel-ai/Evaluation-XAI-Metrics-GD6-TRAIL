@@ -2,7 +2,7 @@
 
 ## Settings to run the code
 
-* Install the requirements.txt file, for example: `pip install -r requirements.txt`, in the main folder as well as the quantus folder
+* Install the requirements.txt file, for example: `pip install -r requirements.txt`, for the txt file in the main folder as well as the requirements.txt file in the quantus folder
 * You should download the dataset files (ILSVRC2012_img_val.tar and ILSVRC2012_devkit_t12.tar.gz) inside a folder named imagenet (no need to extract, it's done automatically)
 * Create a folder named npz to save npz saliency maps.
 * Create a folder csv to save metric results.
