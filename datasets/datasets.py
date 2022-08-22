@@ -9,6 +9,8 @@ from torchvision import transforms
 
 from torchvision.datasets.imagenet import ImageNet
 
+from torchvision.datasets import CIFAR10
+
 # dict containing datasets information and parameters
 datasets_dict = {
     'imagenet': {
@@ -16,6 +18,16 @@ datasets_dict = {
         'n_output': 1000,
         'split': 'val',
         'indices_csv': '2000idx_ILSVRC2012.csv',
+        'transform': transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Resize((224, 224)),
+            transforms.Normalize( (0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),
+        ])
+    },
+    'cifar10': {
+        'class_fn': CIFAR10,
+        'n_output': 10,
+        'split': 'val',
         'transform': transforms.Compose([
             transforms.ToTensor(),
             transforms.Resize((224, 224)),
