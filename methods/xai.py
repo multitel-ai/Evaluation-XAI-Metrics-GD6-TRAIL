@@ -173,8 +173,13 @@ class CAMERASWrapper:
     """
     def __init__(self,
                  model,
+                 dataset_name=None,
                  **kwargs):
-        self.cameras = CAMERAS(model=model, targetLayerName=models_dict[type(model)]['layers'][-1])
+        if dataset_name=='imagenet':
+            input_resolutions = list(range(224,1000,100))
+        elif dataset_name=='cifar10':
+            input_resolutions = list(range(32,142,14))
+        self.cameras = CAMERAS(model=model, targetLayerName=models_dict[type(model)]['layers'][-1], inputResolutions=input_resolutions)
 
     def attribute(self, inputs, target=None):
         map = self.cameras.run(inputs, classOfInterest=target)
