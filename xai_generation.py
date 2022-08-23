@@ -261,6 +261,10 @@ def XAI_for_Quantus(model, inputs, targets, device, batch_size=1, img_shape = [3
 
     list_maps = []
     #os.system("nvidia-smi")
+    if args.dataset_name=='imagenet':
+        img_shape = [3, 224, 224]
+    elif args.dataset_name=='cifar10':
+        img_shape = [3, 32, 32]
 
     X = torch.tensor(inputs.reshape([batch_size] + img_shape), dtype=torch.float).to(device)
     y = torch.tensor(np.array(targets).reshape((batch_size,))).to(device)
