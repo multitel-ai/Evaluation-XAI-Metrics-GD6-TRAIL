@@ -93,7 +93,11 @@ class Rise:
     Petsiuk, V., Das, A., & Saenko, K. (2018). Rise: Randomized input sampling for explanation of black-box models.
     arXiv preprint arXiv:1806.07421. https://arxiv.org/abs/1806.07421
     """
-    def __init__(self, model, input_size=224, batch_size=16, **kwargs):
+    def __init__(self, model, input_size=224, batch_size=16, dataset_name=None, **kwargs):
+        if dataset_name=='imagenet':
+            input_size = 224
+        elif dataset_name=='cifar10':
+            input_size = 32
         params = methods_dict['rise']['params_attr']
         self.rise = RISE(model, (input_size, input_size), batch_size)
         self.rise.generate_masks(N=params['n_masks'], s=8, p1=0.1)
@@ -360,7 +364,7 @@ models_dict = {
 }
 
 
-def get_method(name, model, batch_size=16):
+def get_method(name, model, batch_size=16, dataset_name=None):
     """
     Get the corresponding method
     :param name: name of the method to return
@@ -369,4 +373,4 @@ def get_method(name, model, batch_size=16):
     :return: method class
     """
     cur_dict = methods_dict[name]
-    return cur_dict["class_fn"](model, method_name=name, batch_size=batch_size)
+    return cur_dict["class_fn"](model, method_name=name, batch_size=batch_size, dataset_name=dataset_name)

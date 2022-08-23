@@ -131,7 +131,7 @@ def main():
     if args.npz_checkpoint:
         method = None
     else:
-        method=get_method(args.method, model, batch_size=args.batch_size)
+        method=get_method(args.method, model, batch_size=args.batch_size, dataset_name=args.dataset_name)
 
     # Limit validation size if required in arguments (mostly for debugging purpose)
     if args.limit_val != 0:
@@ -189,7 +189,7 @@ def main():
 
     #Defining XAI_method for robustness and randomisation
     if args.metrics in metric_types["robustness"] or args.metrics in metric_types["randomisation"]:
-        XAI_method = get_method(args.method, model)
+        XAI_method = get_method(args.method, model, dataset_name=args.dataset_name)
 
     # Compute metrics or skip it if required (in case of only generation)
     if not args.skip_metrics:
