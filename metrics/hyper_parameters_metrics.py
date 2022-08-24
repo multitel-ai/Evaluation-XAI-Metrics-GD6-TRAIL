@@ -4,7 +4,7 @@ import quantus
 
 def get_hyper_param_eval(img_size=224, num_classes=1000):
     if img_size == 32:
-        small_patch_size = 6
+        small_patch_size = 2
         big_patch_size = 12
     else:
         small_patch_size = 14
