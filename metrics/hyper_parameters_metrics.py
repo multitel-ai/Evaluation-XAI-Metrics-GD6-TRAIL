@@ -6,9 +6,11 @@ def get_hyper_param_eval(img_size=224, num_classes=1000):
     if img_size == 32:
         small_patch_size = 2
         big_patch_size = 12
+        num_classes = 10
     else:
         small_patch_size = 14
         big_patch_size = 28
+        num_classes = 1000
 
 
     hyper_param_eval = {
