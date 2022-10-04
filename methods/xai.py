@@ -179,6 +179,8 @@ class CAMERASWrapper:
             input_resolutions = list(range(224,1000,100))
         elif dataset_name=='cifar10':
             input_resolutions = list(range(32,142,14))
+        else:
+            raise "Dataset name unknown, not 'imagenet' nor 'cifar10'."
         self.cameras = CAMERAS(model=model, targetLayerName=models_dict[type(model)]['layers'][-1], inputResolutions=input_resolutions)
 
     def attribute(self, inputs, target=None):

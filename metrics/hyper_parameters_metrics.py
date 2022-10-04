@@ -3,14 +3,17 @@ import quantus
 
 
 def get_hyper_param_eval(img_size=224, num_classes=1000):
+    # cifar10 
     if img_size == 32:
         small_patch_size = 2
-        big_patch_size = 12
+        big_patch_size = 4
         num_classes = 10
-    else:
+    # ImageNet
+    elif img_size == 224:
         small_patch_size = 14
         big_patch_size = 28
         num_classes = 1000
+    else: raise NotImplementedError("Metrics hyperparameters not defined for image size different from 32 (CIFAR10) and 224 (ImageNet).")
 
 
     hyper_param_eval = {
