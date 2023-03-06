@@ -1,4 +1,4 @@
-# ICIP2022-GD6-TRAIL
+# Evaluation-XAI-Metrics-GD6-TRAIL
 
 ## Settings to run the code
 
